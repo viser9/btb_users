@@ -5,12 +5,15 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React</title>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     <script defer src="face-api.min.js"></script>
     <script defer src="script.js"></script>
-    <video id="video" width="450" height="300" autoplay></video>
+    <div id="overlay-container">
+      <video id="video" width="450" height="300" autoplay></video>
+    </div>
   </body>
 </html>

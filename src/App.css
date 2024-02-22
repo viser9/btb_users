@@ -1,18 +1,38 @@
-.appvide{
-  display: flex;
-  align-items: center;
+.App {
+  text-align: center;
 }
 
-.appcanvas{
-  position: absolute;
-  top: 100px
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
 }
 
-.myapp{
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #000000;
+  min-height: 100vh;
   display: flex;
-  width: 100vw;
-  height: 100vh;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #E16428;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

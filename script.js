@@ -33,6 +33,7 @@ function getLabeledFaceDescriptions() {
           .withFaceDescriptor();
           if (detections) {
             descriptions.push(detections.descriptor);
+            
           } else {
             console.log(`No face detected in ${label}/${i}.png`);
           }
@@ -42,6 +43,8 @@ function getLabeledFaceDescriptions() {
   );
 }
 
+let unknownFaceCount = 0;
+
 video.addEventListener("play", async () => {
   const labeledFaceDescriptors = await getLabeledFaceDescriptions();
   const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors);
@@ -49,10 +52,15 @@ video.addEventListener("play", async () => {
   const canvas = faceapi.createCanvasFromMedia(video);
   document.body.append(canvas);
 
+  // Position the canvas to overlay on top of the video
+  canvas.style.position = 'absolute';
+  canvas.style.top = `${video.offsetTop}px`; // Adjust for video offset
+  canvas.style.right = `${video.offsetLeft}px`; // Adjust for video offset
+
   const displaySize = { width: video.width, height: video.height };
   faceapi.matchDimensions(canvas, displaySize);
 
-  const unknownFaceThreshold = 0.3; // Adjust this threshold as needed
+  const unknownFaceThreshold = 0.3;
 
   setInterval(async () => {
     const detections = await faceapi
@@ -66,66 +74,33 @@ video.addEventListener("play", async () => {
 
     const results = resizedDetections.map((d) => {
       const match = faceMatcher.findBestMatch(d.descriptor);
-      // if (match._label === "unknown" && match._distance > unknownFaceThreshold) {
-      //   // Display an alert for unknown faces with confidence below the threshold
-      //   alert("Unknown face detected!");
-      //   window.location.href = "http://127.0.0.1:5500/error.html";
-      // }
-      // else {
-      //   window.location.href = "http://127.0.0.1:5500/end.html";
-      // }
+      if (match._label === "unknown" && match._distance > unknownFaceThreshold) {
+        // Increment the unknown face count
+        unknownFaceCount++;
+        alert("Unknown face detected!");
+        if (unknownFaceCount > 1) {
+            alert("Unknown face detected too many times. Terminating process.");
+            // window.location.href = "http://127.0.0.1:5500/terminate.html";
+            window.open("terminate.html", "_blank");
+        } 
+      }
+      else {
+          unknownFaceCount = 0;
+      }
       return match;
     });
 
     results.forEach((result, i) => {
       const box = resizedDetections[i].detection.box;
-      const drawBox = new faceapi.draw.DrawBox(box, {
-        label: result.toString(),
-      });
+
+      const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() });
+      localStorage.setItem("faceName",JSON.stringify(result.toString().split(' ')[0]));
       drawBox.draw(canvas);
     });
-
   }, 1000);
+
+  window.addEventListener('beforeunload', () => {
+    // Remove the local storage item when the page is closed or unloaded
+    localStorage.removeItem("faceDescriptors");
+  });
 });
-
-// video.addEventListener("play", async () => {
-//   const labeledFaceDescriptors = await getLabeledFaceDescriptions();
-//   const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors);
-
-//   const canvas = faceapi.createCanvasFromMedia(video);
-//   document.body.append(canvas);
-
-//   // Position the canvas to overlay on top of the video
-//   canvas.style.position = 'absolute';
-//   canvas.style.top = `${video.offsetTop}px`; // Adjust for video offset
-//   canvas.style.right = `${video.offsetLeft}px`; // Adjust for video offset
-
-//   const displaySize = { width: video.width, height: video.height };
-//   faceapi.matchDimensions(canvas, displaySize);
-
-//   const unknownFaceThreshold = 0.3;
-
-//   setInterval(async () => {
-//     const detections = await faceapi
-//       .detectAllFaces(video)
-//       .withFaceLandmarks()
-//       .withFaceDescriptors();
-
-//     const resizedDetections = faceapi.resizeResults(detections, displaySize);
-
-//     canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
-
-//     const results = resizedDetections.map((d) => {
-//       const match = faceMatcher.findBestMatch(d.descriptor);
-//       return match;
-//     });
-
-//     results.forEach((result, i) => {
-//       const box = resizedDetections[i].detection.box;
-
-//       const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() });
-
-//       drawBox.draw(canvas);
-//     });
-//   }, 1000);
-// });

@@ -14,7 +14,7 @@ import { toast, Toaster } from "react-hot-toast";
 
 let lname = null;
 
-export default function App() {
+export default function App({stopVideo}) {
   const appStyle = {
     background: "orange",
     padding: "20px",
@@ -86,6 +86,13 @@ export default function App() {
         await transaction.wait();
         toast.success("Voted Successfully");
         console.log(transaction);
+        // localStorage.setItem("candidate",candidates[index-1].name);
+        const param1 = candidates[index-1].name;
+        const param2 = candidates[index-1].party;
+        localStorage.setItem("party",candidates[index-1].party);
+        setTimeout(()=>{
+          window.open(`rec.html?param1=${param1}&param2=${param2}`, "_blank");
+        },3000)
       }catch(error){
         console.log(error);
       }
